@@ -5,7 +5,7 @@
 3. Frontend/backend integration — completed.
 4. Real email extraction — implemented and verified; previously called Stage 5 after accounts were moved earlier.
 5. Reliable imports — duplicate protection and matching implemented; older/undated overwrite guard and attach-only flow added. Targeted automated checks pass; new UI smoke check pending.
-6. Follow-up assistance — existing reminders and upcoming interviews reused; editable context-based template and copy action added. No auto-send or paid API calls. Final UI/build checks pending.
+6. Follow-up assistance — existing reminders and upcoming interviews reused; editable context-based template and copy action added. No auto-send or paid API calls. Complete: production build and draft edit/copy browser check verified.
 7. Test and deploy public fictional-data demo — pending.
 8. Authentication and Gmail — accounts completed early; Gmail/OAuth/jobs pending.
 9. Documentation and interview preparation — documentation ongoing; consolidation pending.

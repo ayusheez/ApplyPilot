@@ -9,3 +9,5 @@ Stage 5 gap: older or undated source emails cannot overwrite application fields.
 Verification: 4 targeted backend checks passed in temporary SQLite databases (old email blocked and attach-only preserved details/deduplication; undated update blocked; reminder set/clear; newer reviewed update). No user database was touched. Initial test invocation failed because of wrong working directory; corrected invocation passed. Existing Starlette deprecation warning remains.
 
 Manual checkpoint: restart backend with outputs/Restart-ApplyPilot-Backend.ps1, refresh frontend, open an application, create/edit/copy a draft. Set a follow-up date using Edit and check Overview. Run production build once via outputs/Verify-ApplyPilot.ps1. Gmail remains Stage 8.
+
+Completion: user-run production build and 12 client checks passed; screenshots confirm editable draft creation, successful copying and pasted text. Stage 6 complete.

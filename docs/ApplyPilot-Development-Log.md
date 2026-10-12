@@ -122,3 +122,11 @@ The attached original roadmap is now authoritative (docs/ROADMAP.md). Earlier St
 Added older/undated email update guard with attach-only import option. Added editable local follow-up template and clipboard action; reused existing Overview reminders/interviews and date editing. No AI calls, dependency installs, database migrations or user-data changes. Four targeted backend checks passed in temporary SQLite databases after correcting the test working directory. Stage 6 final UI and production-build verification remain pending. See Stage6 guide for scope and limitations.
 
 Additional verification: frontend TypeScript passed; six draft-status checks and one check that interview drafts do not claim an interview already happened passed. git diff --check passed. No live AI calls made.
+
+
+## Original Stage 6 build verified
+User PowerShell output confirms backend restart completed (PID 48896, port 18083) and Stage 6 type checks, 12 client checks and production build passed at 19:07:51. No rerun needed. Manual create/edit/copy draft browser check remains pending; do not mark that interaction verified yet.
+
+
+## Original Stage 6 complete — browser check confirmed
+User screenshots show the follow-up draft with an edited signature, the successful clipboard message, and copied text in Notes. Combined with the passing production build, type checks and targeted tests, Stage 6 follow-up assistance is verified complete. Drafts remain local templates with no automatic sending. Next is original Stage 7 (test and deploy fictional-data demo); Gmail remains Stage 8. No tests or external API calls repeated.
