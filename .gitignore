@@ -1,0 +1,30 @@
+# Secrets and local state
+.env
+.env.*
+!.env.example
+.dev.vars
+*.local
+*client_secret*.json
+credentials.json
+token.json
+*.pem
+*.key
+# Dependencies and generated files
+node_modules/
+.venv*/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.db
+*.sqlite*
+*.log
+.output/
+.tanstack/
+.nitro/
+.wrangler/
+.vite/
+.vinxi/
+dist/
+dist-ssr/
+.stage*-test-build/
+.DS_Store
