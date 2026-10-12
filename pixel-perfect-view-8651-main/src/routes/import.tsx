@@ -165,6 +165,7 @@ function Review({ email, extraction, onBack, onSaved }: {
     nextAction: extraction.nextAction.value ?? "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof Fields, string>>>({});
+  const [updateFields, setUpdateFields] = useState(true);
   const [saveError, setSaveError] = useState<string | null>(null);
   const match = apps?.find((a) => a.id === extraction.matchedApplicationId);
   const [mode, setMode] = useState<"update" | "new">(extraction.matchedApplicationId ? "update" : "new");
@@ -185,6 +186,7 @@ function Review({ email, extraction, onBack, onSaved }: {
         email,
         fields: { ...fields, status: fields.status as ApplicationStatus },
         targetApplicationId: updating ? match!.id : null,
+        updateFields: updating ? updateFields : true,
       });
       onSaved(app, updating);
     } catch (err) {
@@ -236,8 +238,10 @@ function Review({ email, extraction, onBack, onSaved }: {
           </RadioGroup>
           {mode === "update" && (
             <div className="mt-4 rounded-md border border-border bg-muted/30 p-3 text-sm">
-              <p className="mb-2 text-xs font-medium text-muted-foreground">Proposed changes</p>
-              {changes.length === 0 ? <p className="text-muted-foreground">No field changes — the email will be attached to the record.</p> : (
+              <label className="mb-3 flex items-center gap-2"><input type="checkbox" checked={updateFields} onChange={(e) => setUpdateFields(e.target.checked)} />Apply reviewed fields to this application</label>
+              <p className="mb-2 text-xs text-muted-foreground">Uncheck to attach the email and keep current details. Older or undated emails must be attached without updates.</p>
+              <p className="mb-2 text-xs font-medium text-muted-foreground">{updateFields ? "Proposed changes" : "Current fields will be preserved"}</p>
+              {!updateFields ? <p>Only the source email and an import timeline entry will be saved.</p> : changes.length === 0 ? <p className="text-muted-foreground">No field changes — the email will be attached to the record.</p> : (
                 <ul className="space-y-1">{changes.map(([l, a, b]) => <li key={l}><span className="text-muted-foreground">{l}:</span> <span className="line-through opacity-60">{a}</span> → <span className="font-medium">{b}</span></li>)}</ul>
               )}
             </div>

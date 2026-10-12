@@ -160,11 +160,15 @@ def create_app(database_url=None):
         fields = data.fields.model_dump()
         if data.target_application_id:
             a = get(db,data.target_application_id,user.id,lock=True)
-            if a.status != fields['status']:
-                a.timeline.append(TimelineEvent(type='status',status=fields['status'],description=f"Status changed to {fields['status']} (from email)"))
-            for k,v in fields.items():
-                if v is not None:
-                    setattr(a,k,v)
+            if data.update_fields:
+                latest = max([a.applied_on, a.last_updated.date()] + [e.received_at for e in a.emails if e.received_at])
+                if data.email.received_at is None or data.email.received_at < latest:
+                    raise HTTPException(409, 'This email has an older or unknown received date. Attach it without updating fields, or edit the application directly after review.')
+                if a.status != fields['status']:
+                    a.timeline.append(TimelineEvent(type='status',status=fields['status'],description=f"Status changed to {fields['status']} (from email)"))
+                for k,v in fields.items():
+                    if v is not None:
+                        setattr(a,k,v)
             a.last_updated = now()
         else:
             a = Application(**fields, owner_id=user.id, applied_on=data.email.received_at or date.today(), notes='')
