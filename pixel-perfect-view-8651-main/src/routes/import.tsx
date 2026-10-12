@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertCircle, CheckCircle2, Copy, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { GmailImport } from "@/components/GmailImport";
 import { PageHeader } from "@/components/AppShell";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,7 @@ type Fields = { company: string; role: string; status: ApplicationStatus | ""; i
 type Stage =
   | { s: "input" }
   | { s: "duplicate"; applicationId: string; label: string }
-  | { s: "review"; extraction: ExtractionResult }
+  | { s: "review"; extraction: ExtractionResult; gmailJobId?: string }
   | { s: "saved"; app: Application; updated: boolean };
 
 const blankEmail: EmailInput = { subject: "", sender: "", receivedAt: "", body: "" };
@@ -78,6 +79,12 @@ function ImportPage() {
     <>
       <PageHeader title="Import email" meta={<>Paste an email → analyse → review → save. <span className="ml-1 rounded border border-border bg-muted px-1.5 py-0.5 text-xs font-medium text-foreground">Gemini analysis</span></>} />
 
+      {stage.s === "input" && <GmailImport onReview={(result) => {
+        if (result.kind === "duplicate") { setStage({s:"duplicate",applicationId:result.applicationId,label:`${result.role} at ${result.company}`}); return; }
+        setEmail(result.email);
+        const empty = {value:null,excerpt:null};
+        setStage({s:"review",gmailJobId:result.jobId,extraction:{company:{...empty},role:{...empty},status:{...empty},interviewDate:{...empty},followUpDate:{...empty},nextAction:{...empty},matchedApplicationId:null}});
+      }} />}
       {stage.s === "saved" ? (
         <div className="surface p-8 text-center">
           <CheckCircle2 className="mx-auto h-8 w-8 text-status-offer" aria-hidden />
@@ -89,7 +96,7 @@ function ImportPage() {
           </div>
         </div>
       ) : stage.s === "review" ? (
-        <Review email={email} extraction={stage.extraction} onBack={() => setStage({ s: "input" })} onSaved={(app, updated) => setStage({ s: "saved", app, updated })} />
+        <Review email={email} {...(stage.gmailJobId ? {gmailJobId:stage.gmailJobId} : {})} extraction={stage.extraction} onBack={() => { if(stage.gmailJobId) setEmail(blankEmail); setStage({ s: "input" }); }} onSaved={(app, updated) => setStage({ s: "saved", app, updated })} />
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
           <form onSubmit={analyse} noValidate className="surface space-y-4 p-5">
@@ -122,7 +129,7 @@ function ImportPage() {
               <Textarea disabled={analysing} id="body" rows={12} value={email.body} onChange={(e) => setE("body", e.target.value)} aria-invalid={!!emailErrors.body} aria-describedby={emailErrors.body ? "body-error" : undefined} />
               {emailErrors.body && <p id="body-error" className="text-xs text-destructive">{emailErrors.body}</p>}
             </div>
-            <p className="text-xs text-muted-foreground">Analysing sends this email to Google Gemini. Free-tier content may be used to improve Google products. Try a fictional sample first and remove sensitive information.</p>
+            <p className="text-xs text-muted-foreground">For fictional or non-personal sample emails only: analysing sends this text to Google Gemini. Do not paste personal or confidential emails here. Use Gmail local review for your real emails.</p>
             <div className="flex items-center gap-3">
               <Button type="submit" disabled={analysing}>{analysing ? <><Loader2 className="h-4 w-4 animate-spin" />Analysing…</> : "Analyse email"}</Button>
               {(email.subject || email.body) && !analysing && <Button type="button" variant="ghost" onClick={reset}>Clear</Button>}
@@ -151,8 +158,8 @@ function ImportPage() {
   );
 }
 
-function Review({ email, extraction, onBack, onSaved }: {
-  email: EmailInput; extraction: ExtractionResult; onBack: () => void; onSaved: (a: Application, updated: boolean) => void;
+function Review({ email, extraction, gmailJobId, onBack, onSaved }: {
+  email: EmailInput; extraction: ExtractionResult; gmailJobId?: string; onBack: () => void; onSaved: (a: Application, updated: boolean) => void;
 }) {
   const { data: apps } = useApplications();
   const save = useSaveImport();
@@ -167,7 +174,8 @@ function Review({ email, extraction, onBack, onSaved }: {
   const [errors, setErrors] = useState<Partial<Record<keyof Fields, string>>>({});
   const [updateFields, setUpdateFields] = useState(true);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const match = apps?.find((a) => a.id === extraction.matchedApplicationId);
+  const [targetId, setTargetId] = useState(extraction.matchedApplicationId || "");
+  const match = apps?.find((a) => a.id === targetId);
   const [mode, setMode] = useState<"update" | "new">(extraction.matchedApplicationId ? "update" : "new");
 
   const set = (k: keyof Fields, v: string) => { setFields((p) => ({ ...p, [k]: v })); setErrors((p) => ({ ...p, [k]: undefined })); };
@@ -184,6 +192,7 @@ function Review({ email, extraction, onBack, onSaved }: {
     try {
       const app = await save.mutateAsync({
         email,
+        ...(gmailJobId ? {gmailJobId} : {}),
         fields: { ...fields, status: fields.status as ApplicationStatus },
         targetApplicationId: updating ? match!.id : null,
         updateFields: updating ? updateFields : true,
@@ -228,6 +237,7 @@ function Review({ email, extraction, onBack, onSaved }: {
         {email.sender && <span className="text-muted-foreground"> · {email.sender}</span>}
       </div>
 
+      {gmailJobId && <section className="surface space-y-3 p-5"><h2 className="section-title">Review Gmail email locally</h2><p className="text-sm">No AI service was used. Fill in the fields below from this email. The pending email is encrypted in your local database until you save or discard it.</p><pre className="max-h-64 overflow-auto whitespace-pre-wrap font-sans text-sm">{email.body}</pre><label htmlFor="gmail-target" className="text-sm">Save destination</label><select id="gmail-target" className="w-full rounded border bg-background p-2" value={targetId} onChange={e=>{setTargetId(e.target.value);setMode(e.target.value?"update":"new");const a=apps?.find(a=>a.id===e.target.value);if(a)setFields({company:a.company,role:a.role,status:a.status,interviewDate:a.interviewDate||"",followUpDate:a.followUpDate||"",nextAction:a.nextAction||""});}}><option value="">New application</option>{apps?.map(a=><option key={a.id} value={a.id}>{a.company} — {a.role}</option>)}</select></section>}
       {match && (
         <section className="surface p-5">
           <h2 className="section-title">Matches an existing application</h2>
@@ -249,7 +259,7 @@ function Review({ email, extraction, onBack, onSaved }: {
         </section>
       )}
 
-      <p className="text-sm text-muted-foreground">Review these AI suggestions before saving. Nothing has been added to your applications yet.</p>
+      <p className="text-sm text-muted-foreground">{gmailJobId ? "Review your entries before saving. Nothing has been added to your applications yet." : "Review these AI suggestions before saving. Nothing has been added to your applications yet."}</p>
       {!!extraction.warnings?.length && <ul role="status" className="text-sm text-muted-foreground">{extraction.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>}
       <section className="surface px-5 py-1">
         {row("company", "Company", <Input {...ia("company")} value={fields.company} onChange={(e) => set("company", e.target.value)} />)}

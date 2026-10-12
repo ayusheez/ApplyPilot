@@ -14,6 +14,8 @@ from .models import Application, TimelineEvent, SourceEmail, now
 from .auth import install_auth
 from .schemas import ApplicationCreate, ApplicationPatch, ImportSave, EmailInput
 from . import analysis
+from .gmail import install_gmail, unseal
+from .models import GmailImportJob
 
 def fingerprint(email, owner_id):
     normalized = ' '.join(f'{email.subject}\n{email.body}'.lower().split())
@@ -59,6 +61,7 @@ def create_app(database_url=None):
         return response
 
     current_user = install_auth(app, session, origins)
+    install_gmail(app, session, current_user, fingerprint)
 
     @app.exception_handler(HTTPException)
     async def http_error(request, exc):
@@ -154,6 +157,14 @@ def create_app(database_url=None):
 
     @app.post('/api/imports', status_code=201)
     def save_import(data: ImportSave, db: Session = Depends(session), user=Depends(current_user)):
+        job = None
+        if data.gmail_job_id:
+            job = db.scalar(select(GmailImportJob).where(GmailImportJob.id==data.gmail_job_id, GmailImportJob.user_id==user.id).with_for_update())
+            if not job:
+                raise HTTPException(404,'Gmail import not found.')
+            if job.status!='ready' or not job.email_data:
+                raise HTTPException(409,'This Gmail import is not ready or has already been saved.')
+            data.email = EmailInput.model_validate(unseal(job.email_data))
         fp = fingerprint(data.email,user.id)
         if db.scalar(select(SourceEmail.id).where(SourceEmail.fingerprint==fp)):
             raise HTTPException(409,'This email was already imported.')
@@ -175,6 +186,9 @@ def create_app(database_url=None):
             db.add(a)
         a.timeline.append(TimelineEvent(type='import',status=a.status,description=f'Email imported: {data.email.subject}'))
         a.emails.append(SourceEmail(**data.email.model_dump(),fingerprint=fp))
+        if job:
+            db.flush()
+            job.status='saved'; job.application_id=a.id; job.email_data=None; job.updated_at=now()
         try:
             db.commit()
         except IntegrityError:

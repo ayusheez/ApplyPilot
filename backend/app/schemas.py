@@ -73,6 +73,7 @@ class ImportFields(Schema):
     _blank = field_validator('interview_date','follow_up_date','next_action', mode='before')(ApplicationCreate.blank_optional.__func__)
 
 class ImportSave(Schema):
+    gmail_job_id: str | None = None
     update_fields: bool = True
     email: EmailInput
     fields: ImportFields

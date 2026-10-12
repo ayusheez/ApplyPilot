@@ -67,6 +67,7 @@ export type AnalysisResponse =
   | { kind: "result"; extraction: ExtractionResult };
 
 export interface ImportSaveRequest {
+  gmailJobId?: string;
   updateFields?: boolean;
   email: EmailInput;
   fields: {

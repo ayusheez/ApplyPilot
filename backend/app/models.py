@@ -62,3 +62,30 @@ class LoginSession(Base):
     user_id: Mapped[str] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
+
+class GmailConnection(Base):
+    __tablename__ = 'gmail_connections'
+    user_id: Mapped[str] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
+    mailbox: Mapped[str] = mapped_column(String(320))
+    tokens: Mapped[str] = mapped_column(Text)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+class GmailOAuthState(Base):
+    __tablename__ = 'gmail_oauth_states'
+    state_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
+    session_hash: Mapped[str] = mapped_column(String(64))
+    verifier: Mapped[str] = mapped_column(Text)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+class GmailImportJob(Base):
+    __tablename__ = 'gmail_import_jobs'
+    __table_args__ = (UniqueConstraint('user_id','mailbox','message_id',name='uq_gmail_job_message'),)
+    id: Mapped[str] = mapped_column(String(36),primary_key=True,default=uid)
+    user_id: Mapped[str] = mapped_column(ForeignKey('users.id',ondelete='CASCADE'),index=True)
+    mailbox: Mapped[str] = mapped_column(String(320))
+    message_id: Mapped[str] = mapped_column(String(128))
+    status: Mapped[str] = mapped_column(String(20))
+    email_data: Mapped[str | None] = mapped_column(Text)
+    application_id: Mapped[str | None] = mapped_column(ForeignKey('applications.id',ondelete='SET NULL'))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),default=now)

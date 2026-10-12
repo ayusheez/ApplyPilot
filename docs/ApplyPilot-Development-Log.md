@@ -130,3 +130,8 @@ User PowerShell output confirms backend restart completed (PID 48896, port 18083
 
 ## Original Stage 6 complete — browser check confirmed
 User screenshots show the follow-up draft with an edited signature, the successful clipboard message, and copied text in Notes. Combined with the passing production build, type checks and targeted tests, Stage 6 follow-up assistance is verified complete. Drafts remain local templates with no automatic sending. Next is original Stage 7 (test and deploy fictional-data demo); Gmail remains Stage 8. No tests or external API calls repeated.
+
+
+## Original Stage 8 implementation — Gmail connection and local review
+Installed user-provided cryptography 50.0.2 and pinned installed dependencies without reinstalling. OAuth settings already configured privately in ignored .env. Corrected base64 padding on the generated encryption key and validated it without printing it. Added Gmail migration/models/API, encrypted tokens/pending imports, single-use session-bound OAuth, read-only selection, resumable jobs, explicit local review, duplicate-safe transactional saves and disconnect controls. Personal Gmail content is not sent to Gemini. Automatic private-email AI extraction is not implemented.
+Eight mocked Gmail backend tests passed; TypeScript passed after one correction for optional-field typing. No user database writes or live Google API calls performed during these tests. PostgreSQL migration, build and live OAuth smoke check require user-run restart/build/authorization. Stage 8 remains pending those checks. Stage 7 deployment remains paused. Work isolated on stage-8-gmail; earlier snapshot unchanged.
