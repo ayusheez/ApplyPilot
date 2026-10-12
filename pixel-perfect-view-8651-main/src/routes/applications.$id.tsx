@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { FollowUpDraft } from "@/components/FollowUpDraft";
 import { ApplicationFormDialog } from "@/components/ApplicationFormDialog";
 import { DeleteApplicationDialog } from "@/components/DeleteApplicationDialog";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -74,6 +75,7 @@ function DetailPage() {
               </Item>
             </dl>
           </section>
+          <FollowUpDraft key={app.id} app={app} />
           <Notes app={app} />
           <section className="surface p-5">
             <h2 className="section-title">Source emails</h2>

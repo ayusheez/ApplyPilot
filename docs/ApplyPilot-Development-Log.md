@@ -115,3 +115,10 @@ Remaining Stage 5 verification: production-build success output has not been sup
 
 ## Stage 5 verified complete — 12 October 2026
 User supplied the successful Stage 5 type checks, 12 client checks and production-build output (02:23:23). Backend startup completed on port 18083. Logs show two earlier /api/analysis 503 responses, followed by /api/analysis 200, /api/imports 201 Created, and subsequent /api/applications 200 responses. Together with the screenshots and refresh confirmation, this verifies the full live workflow and resolves all pending Stage 5 build/browser checks. Original provider failure cause remains unconfirmed; no additional retries or tests were run for this documentation update. Stage 5 complete. Gmail integration remains future work.
+
+
+## Original roadmap restored — Stage 5 imports and Stage 6 follow-ups
+The attached original roadmap is now authoritative (docs/ROADMAP.md). Earlier Stage 4/5 labels referred to accounts/AI; historical entries and snapshot tags remain unchanged. Gmail is Stage 8, not Stage 6.
+Added older/undated email update guard with attach-only import option. Added editable local follow-up template and clipboard action; reused existing Overview reminders/interviews and date editing. No AI calls, dependency installs, database migrations or user-data changes. Four targeted backend checks passed in temporary SQLite databases after correcting the test working directory. Stage 6 final UI and production-build verification remain pending. See Stage6 guide for scope and limitations.
+
+Additional verification: frontend TypeScript passed; six draft-status checks and one check that interview drafts do not claim an interview already happened passed. git diff --check passed. No live AI calls made.
