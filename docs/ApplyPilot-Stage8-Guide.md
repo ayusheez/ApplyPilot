@@ -32,3 +32,7 @@ https://developers.google.com/identity/protocols/oauth2/web-server
 https://developers.google.com/identity/protocols/oauth2
 https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/list
 https://ai.google.dev/gemini-api/terms
+
+
+## Stage 8 local release checkpoint verified
+User supplied Stage 8 type checks, 12 client checks and production-build success (21:33:42). Screenshots verify duplicate-email detection; user reports saved applications remain after the disconnect check. Live connection, selected-email manual review, save and refresh persistence were already confirmed. Local Gmail integration workflow is verified; Google-side revocation was not independently inspected. No tests repeated. Personal Gmail AI extraction and automatic syncing are not implemented. Stage 7 deployment remains paused; Stage 9 documentation/interview consolidation remains outstanding.
